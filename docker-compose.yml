@@ -3,6 +3,8 @@ version: "2.1"
 volumes:
   pihole_config:
   dnsmasq_config:
+  homebridge:
+  deconz:
 
 services:
   pihole:
@@ -44,3 +46,37 @@ services:
       io.balena.features.supervisor-api: 1
     environment:
       SET_HOSTNAME: pihole
+
+  homebridge:
+    image: oznu/homebridge:ubuntu
+    container_name: homebridge
+    restart: always
+    network_mode: host
+    environment:
+      - HOMEBRIDGE_CONFIG_UI_PORT=8581
+    volumes:
+      - homebridge:/homebridge
+  
+  deconz:
+    image: deconzcommunity/deconz:stable
+    container_name: deconz
+    restart: always
+    privileged: true  
+    network_mode: host              # This is important! Without it, the deCONZ image won't be able to connect to Conbee II.
+    volumes:
+      - deconz:/opt/deCONZ
+    devices:
+      - /dev/ttyACM0                # This is the USB device that Conbee II is running on.
+    environment:
+      - TZ=Europe/Berlin
+      - DECONZ_WEB_PORT=8080
+      - DECONZ_WS_PORT=443
+      - DEBUG_INFO=1
+      - DEBUG_APS=0
+      - DEBUG_ZCL=0
+      - DEBUG_ZDP=0
+      - DEBUG_OTA=0
+      - DEBUG_HTTP=0
+      - DECONZ_DEVICE=/dev/ttyACM0   # This is the USB device that Conbee II is running on.
+      - DECONZ_START_VERBOSE=0
+    
