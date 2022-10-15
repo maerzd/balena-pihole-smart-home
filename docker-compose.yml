@@ -3,7 +3,9 @@ version: "2.1"
 volumes:
   pihole_config: {}
   dnsmasq_config: {}
-  tailscale: {}
+  # tailscale: {}
+  homebridge:
+  deconz:
 
 services:
   pihole:
@@ -58,6 +60,39 @@ services:
     environment:
       SET_HOSTNAME: pihole
 
+  homebridge:
+    image: oznu/homebridge:ubuntu
+    container_name: homebridge
+    restart: always
+    network_mode: host
+    environment:
+      - HOMEBRIDGE_CONFIG_UI_PORT=8581
+    volumes:
+      - homebridge:/homebridge
+  
+  deconz:
+    image: deconzcommunity/deconz:stable
+    container_name: deconz
+    restart: always
+    privileged: true  
+    network_mode: host              # This is important! Without it, the deCONZ image won't be able to connect to Conbee II.
+    volumes:
+      - deconz:/opt/deCONZ
+    devices:
+      - /dev/ttyACM0                # This is the USB device that Conbee II is running on.
+    environment:
+      - TZ=Europe/Berlin
+      - DECONZ_WEB_PORT=8080
+      - DECONZ_WS_PORT=443
+      - DEBUG_INFO=1
+      - DEBUG_APS=0
+      - DEBUG_ZCL=0
+      - DEBUG_ZDP=0
+      - DEBUG_OTA=0
+      - DEBUG_HTTP=0
+      - DECONZ_DEVICE=/dev/ttyACM0   # This is the USB device that Conbee II is running on.
+      - DECONZ_START_VERBOSE=0
+    
   # https://hub.docker.com/r/tailscale/tailscale
   # https://github.com/tailscale/tailscale/blob/main/cmd/containerboot/main.go
   # https://tailscale.com/kb/1282/docker
@@ -65,35 +100,35 @@ services:
   # https://tailscale.com/kb/1241/tailscale-up
   # https://tailscale.com/kb/1242/tailscale-serve
   # https://tailscale.com/kb/1311/tailscale-funnel
-  tailscale:
-    image: tailscale/tailscale:v1.64.1@sha256:8194f391434abfdaa15afdf6e4adec510b37d9cf741881eab12d183bc161ce3f
-    restart: unless-stopped
-    environment:
-      TS_STATE_DIR: /var/lib/tailscale
-      TS_SOCKET: /var/run/tailscale/tailscaled.sock
-      TS_USERSPACE: false
-      TS_AUTH_ONCE: false
-      TS_HOSTNAME: pi-hole
-      TS_EXTRA_ARGS: --accept-dns=false --reset
-    network_mode: host
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-      - SYS_MODULE
-    labels:
-      io.balena.features.kernel-modules: 1
-    tmpfs:
-      - /tmp
-      - /run
-    volumes:
-      - tailscale:/var/lib/tailscale
-    entrypoint:
-      - /bin/sh
-      - -c
-    command:
-      - |
-        modprobe tun || true
-        modprobe wireguard || true
-        mkdir -p /dev/net
-        [ ! -c /dev/net/tun ] && mknod /dev/net/tun c 10 200
-        /usr/local/bin/containerboot
+  # tailscale:
+  #   image: tailscale/tailscale:v1.64.1@sha256:8194f391434abfdaa15afdf6e4adec510b37d9cf741881eab12d183bc161ce3f
+  #   restart: unless-stopped
+  #   environment:
+  #     TS_STATE_DIR: /var/lib/tailscale
+  #     TS_SOCKET: /var/run/tailscale/tailscaled.sock
+  #     TS_USERSPACE: false
+  #     TS_AUTH_ONCE: false
+  #     TS_HOSTNAME: pi-hole
+  #     TS_EXTRA_ARGS: --accept-dns=false --reset
+  #   network_mode: host
+  #   cap_add:
+  #     - NET_ADMIN
+  #     - NET_RAW
+  #     - SYS_MODULE
+  #   labels:
+  #     io.balena.features.kernel-modules: 1
+  #   tmpfs:
+  #     - /tmp
+  #     - /run
+  #   volumes:
+  #     - tailscale:/var/lib/tailscale
+  #   entrypoint:
+  #     - /bin/sh
+  #     - -c
+  #   command:
+  #     - |
+  #       modprobe tun || true
+  #       modprobe wireguard || true
+  #       mkdir -p /dev/net
+  #       [ ! -c /dev/net/tun ] && mknod /dev/net/tun c 10 200
+  #       /usr/local/bin/containerboot
