@@ -60,15 +60,16 @@ services:
     environment:
       SET_HOSTNAME: pihole
 
-  homebridge:
-    image: oznu/homebridge:ubuntu
-    container_name: homebridge
+  homeassistant:
+    build:
+      tag: balena-pihole_homeassistant
+      context: homeassistant
+    ports:
+      - '8000:8123'
     restart: always
-    network_mode: host
-    environment:
-      - HOMEBRIDGE_CONFIG_UI_PORT=8581
     volumes:
-      - homebridge:/homebridge
+      - homeassistant:/config
+    privileged: true
   
   deconz:
     image: deconzcommunity/deconz:stable
