@@ -4,7 +4,7 @@ volumes:
   pihole_config: {}
   dnsmasq_config: {}
   # tailscale: {}
-  homebridge:
+  homeassistant: {}
   deconz:
 
 services:
@@ -59,16 +59,18 @@ services:
       io.balena.features.supervisor-api: 1
     environment:
       SET_HOSTNAME: pihole
-
+  
   homeassistant:
-    build:
-      tag: balena-pihole_homeassistant
-      context: homeassistant
+    image: homeassistant/home-assistant:2024.4.4@sha256:73b70d36610466a46f1ae3b890bc43f06b48a1ac98b4f28c5d52cf424e476cd5
+    network_mode: host
     ports:
       - '8000:8123'
-    restart: always
     volumes:
       - homeassistant:/config
+    labels:
+      io.balena.features.dbus: "1"
+    environment:
+      DBUS_SYSTEM_BUS_ADDRESS: unix:path=/host/run/dbus/system_bus_socket
     privileged: true
   
   deconz:
