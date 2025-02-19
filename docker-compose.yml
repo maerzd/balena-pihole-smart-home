@@ -44,12 +44,6 @@ services:
       - "5053:5053/tcp"
       - "5053:5053/udp"
 
-  # https://github.com/balena-labs-projects/fbcp
-  # https://hub.balena.io/blocks/1792683/fbcp
-  fbcp:
-    image: bh.cr/balenalabs/fbcp/1.0.4
-    privileged: true
-
   # https://github.com/balenablocks/hostname
   # https://hub.balena.io/blocks/1918776/hostname-rpi
   hostname:
@@ -61,7 +55,7 @@ services:
       SET_HOSTNAME: pihole
   
   homeassistant:
-    image: homeassistant/home-assistant:2024.4.4@sha256:73b70d36610466a46f1ae3b890bc43f06b48a1ac98b4f28c5d52cf424e476cd5
+    image: homeassistant/home-assistant:2025.2
     network_mode: host
     ports:
       - '8000:8123'
