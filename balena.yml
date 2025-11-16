@@ -1,6 +1,6 @@
 name: "Pi-hole"
 type: "sw.application"
-version: 2024.3.2
+version: 2025.11.1
 description: "Pi-hole is a Linux network-level advertisement and Internet tracker blocking application!"
 post-provisioning: >-
   ## Usage instructions
@@ -28,8 +28,9 @@ data:
     - WEBPASSWORD: 'balena'
     - PIHOLE_DNS_: '1.1.1.1;1.0.0.1'
     - FBCP_DISPLAY: ""
-  defaultDeviceType: "raspberrypi3"
+  defaultDeviceType: "generic-amd64"
   supportedDeviceTypes:
+    - "generic-amd64"
     - "raspberry-pi2"
     - "raspberrypi3"
     - "raspberrypi3-64"
