@@ -50,7 +50,7 @@ services:
       SET_HOSTNAME: pihole
   
   homeassistant:
-    image: homeassistant/home-assistant:2025.11
+    image: homeassistant/home-assistant:2026.11
     network_mode: host
     ports:
       - '8000:8123'

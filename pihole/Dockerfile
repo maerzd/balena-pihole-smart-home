@@ -1,14 +1,15 @@
 # https://hub.docker.com/r/pihole/pihole/tags
-FROM pihole/pihole:2025.11.1@sha256:91dc91ddd413bf461c283204558f8f21839851e9824799075a7ceff7c77eea40
+FROM pihole/pihole:2026.10.1@sha256:30f803ad5dd60ff96cc0a63008a2e9271af481c1b0399a182192b2e91152c1f9
 
 # https://wiki.alpinelinux.org/wiki/Fonts
 # hadolint ignore=DL3018
 RUN apk add --no-cache bash
 
 # Avoid port conflicts in 53 with the resin-dns interface
+# bind-dynamic (unlike bind-interfaces) also picks up interfaces created later, e.g. tailscale0
 # https://docs.pi-hole.net/ftldns/interfaces/
 RUN mkdir -p /etc/dnsmasq.d && \
-    echo "bind-interfaces" >/etc/dnsmasq.d/90-resin-dns.conf && \
+    echo "bind-dynamic" >/etc/dnsmasq.d/90-resin-dns.conf && \
     echo "except-interface=resin-dns" >>/etc/dnsmasq.d/90-resin-dns.conf
 
 # enable inclusion of dnsmasq.d conf files
@@ -25,6 +26,8 @@ ENTRYPOINT [ "/balena-init.sh" ]
 # https://docs.pi-hole.net/docker/upgrading/v5-v6/?h=web_bind_addr#removed-variables
 ENV FTLCONF_dns_listeningMode='all'
 ENV FTLCONF_dns_upstreams='1.1.1.1;1.0.0.1'
+# The password is a documented default, not a secret. Users override it per fleet.
+# hadolint ignore=DL3064
 ENV FTLCONF_webserver_api_password='balena'
 # https://github.com/pi-hole/FTL/blob/ac500d5f1ff192d087209d6e9b955515c8f35434/test/pihole.toml#L627-L660
 # ENV FTLCONF_webserver_port='80o,443os,[::]:80o,[::]:443os'
